@@ -16,12 +16,15 @@ shinyOptions(cache = cachem::cache_disk("./cache"))
 
 ui <- page_fluid(
   style = "max-width: 700px;",
+  title = "Bastián Olea: Buscador",
+  lang = "es",
   
   # tema
   theme = bs_theme(
     fg = "#553A74",
     bg = "#EAD1FA",
     primary = "#6E3A98",
+    font_scale = 1.1,
     base_font = font_google("Atkinson Hyperlegible"),
     heading_font = font_google("EB Garamond"),
   ),
@@ -61,7 +64,7 @@ ui <- page_fluid(
   
   # texto con cantidad de resultados
   div(
-    style = "margin-top: 24px; margin-bottom: 12px;",
+    style = "margin-top: 24px; margin-bottom: 24px;",
     textOutput("texto_resultados")
   ),
   # hr(),
@@ -69,9 +72,13 @@ ui <- page_fluid(
   # salida en html de resultados
   htmlOutput("resultados"),
   
-  strong(
-    a("Volver al blog",
-      href = "https://bastianolea.rbind.io/blog/")
+  # footer
+  div(
+    style = "margin-bottom: 24px;",
+    strong(
+      a("Volver al blog",
+        href = "https://bastianolea.rbind.io/blog/")
+    )
   )
   
 )
@@ -97,7 +104,7 @@ server <- function(input, output, session) {
   
   # esperar que se deje de escribir para buscar
   termino <- reactive(input$busqueda)
-  termino <- debounce(termino, 300)
+  termino <- debounce(termino, 400)
   
   
   # buscar texto
@@ -177,7 +184,7 @@ server <- function(input, output, session) {
       ui_resultados,
       div(
         # style = "opacity: 60%;",
-        markdown("Esta página también es una [aplicación Shiny](https://bastianolea.rbind.io/tags/shiny/) desarrollada en R. Puedes [revisar su código en su repositorio](https://github.com/bastianolea/blog_buscador).")
+        markdown("Esta página también es una [aplicación Shiny](https://bastianolea.rbind.io/tags/shiny/) desarrollada en R. Puedes [revisar el código en este repositorio](https://github.com/bastianolea/blog_buscador).")
       )
     )
     
