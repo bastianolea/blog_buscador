@@ -18,7 +18,7 @@ extraer_fechas <- function(texto) {
 }
 
 procesar_xml <- function(sitio) {
-
+  
   # leer sitio
   pg <- read_xml(sitio)
   
@@ -79,13 +79,25 @@ procesar_json <- function(sitio) {
   return(datos)
 }
 
-
+# texto de etiquetas separado por punto y comas
 etiquetas <- function(x) {
   map(x, \(tag) {
-    tags <- tag |> 
+    elementos <- tag |> 
+      # separar en elementos
       str_split(";") |> 
       unlist() |> 
+      # eliminar espacios
       str_trim()
-    map(tags, ~div(.x, class = "etiqueta"))
-  }) 
+    
+    # cada elemento convertirlo
+    map(elementos,
+        ~div(class = "etiquetas",
+             # enlace
+             a(
+               div(.x, class = "texto_etiquetas"),
+               href = paste0("https://bastianolea.rbind.io/tags/", 
+                             str_replace_all(.x, " ", "-")),
+               target = "_blank")
+        ))
+  })
 }

@@ -1,4 +1,53 @@
 
+h2 {
+  font-weight: 500;
+}
+
+h3 {
+  color: #9069C0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+a {
+  color: #9069C0;
+}
+
+.fecha {
+  font-size: 12px;
+  margin-bottom: 4px;
+  margin-top: -4px;
+}
+
+.contenedor_etiquetas {
+  color: #EAD1FA !important; 
+  margin-left: -2px;
+}
+
 .etiquetas {
-  background-color: lightgrey;
+
+  margin: 3px; 
+  margin-left: 1px; 
+  margin-right: 1px; 
+  word-break: none;
+  display: inline-block; 
+  white-space: nowrap;
+  font-style: normal;
+  background-color: #9069C0; 
+  border-radius: 3px;
+  padding: 6px !important;
+  padding-top: 1px !important;
+  padding-bottom: 0px !important;
+}
+
+.texto_etiquetas {
+  color: #EAD1FA !important; 
+  text-decoration: none;
+    font-size: 80%;
+}
+
+.excusas {
+  font-style: italic;
+  opacity: 60%;
+  font-family: "EB Garamond";
 }
