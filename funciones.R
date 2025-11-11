@@ -1,7 +1,7 @@
 limpiar_html <- function(texto) {
-  # texto <- gsub("<.*?>", "", texto)
-  # texto <- gsub("[^[:alnum:] ]", "", texto)
-  # texto <- gsub("\n", "", texto)
+  texto <- gsub("<.*?>", "", texto)
+  texto <- gsub("[^[:alnum:] ]", "", texto)
+  texto <- gsub("\n", "", texto)
   return(texto)
 }
 
@@ -9,6 +9,12 @@ limpiar_fechas <- function(texto) {
   texto |> 
     str_extract("\\d{2} \\w{3} \\d{4}") |>
     lubridate::dmy()
+}
+
+extraer_fechas <- function(texto) {
+  texto |> 
+    str_extract("\\d{4}-\\d{2}-\\d{2}") |>
+    lubridate::ymd()
 }
 
 procesar_xml <- function(sitio) {
@@ -50,4 +56,36 @@ procesar_xml <- function(sitio) {
     mutate(texto = paste(titulo, descr))
   
   return(datos)
+}
+
+
+procesar_json <- function(sitio) {
+  # sitio <- "https://bastianolea.rbind.io/index.json"
+  
+  obtener <- sitio |> jsonlite::fromJSON()
+  
+  datos <- obtener |> 
+    tibble() |> 
+    rename(texto = content,
+           link = href,
+           fecha = date,
+           titulo = title) |> 
+    mutate(texto = limpiar_html(texto)) |> 
+    mutate(fecha = extraer_fechas(fecha)) |> 
+    mutate(link = str_replace_all(link,
+                                  "https://bastianoleah.netlify.app", 
+                                  "https://bastianolea.rbind.io"))
+  
+  return(datos)
+}
+
+
+etiquetas <- function(x) {
+  map(x, \(tag) {
+    tags <- tag |> 
+      str_split(";") |> 
+      unlist() |> 
+      str_trim()
+    map(tags, ~div(.x, class = "etiqueta"))
+  }) 
 }
