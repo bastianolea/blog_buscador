@@ -1,0 +1,8 @@
+
+# Buscador de mi blog
+
+Esta app la hice a mano porque encontré demasiado engorroso agregar un motor de búsqueda a un blog Hugo. 
+
+Es una aplicación Shiny muy básica que lee el XML de mi sitio personal, transforma el XML a una tabla, y luego busca el texto insertado por la/el usuario/a y retorna HTML con los resultados.
+
+Guarda un cache de los datos del sitio cada 1 hora para no sobrecargar el servidor.
