@@ -15,7 +15,7 @@ source("funciones.R")
 shinyOptions(cache = cachem::cache_disk("./cache"))
 
 ui <- page_fluid(
-  style = "max-width: 700px;",
+  style = "max-width: 700px; padding: 24px;",
   title = "Bastián Olea: Buscador",
   lang = "es",
   
