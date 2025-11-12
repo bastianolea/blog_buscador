@@ -103,7 +103,7 @@ server <- function(input, output, session) {
   
   
   # esperar que se deje de escribir para buscar
-  termino <- reactive(input$busqueda)
+  termino <- reactive(tolower(input$busqueda))
   termino <- debounce(termino, 400)
   
   
