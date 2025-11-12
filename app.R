@@ -64,7 +64,7 @@ ui <- page_fluid(
   
   # texto con cantidad de resultados
   div(
-    style = "margin-top: 24px; margin-bottom: 24px;",
+    style = "margin-top: 16px; margin-bottom: 32px;",
     textOutput("texto_resultados")
   ),
   # hr(),
@@ -103,26 +103,42 @@ server <- function(input, output, session) {
   
   
   # esperar que se deje de escribir para buscar
-  termino <- reactive(tolower(input$busqueda))
-  termino <- debounce(termino, 400)
+  termino_crudo <- reactive(input$busqueda)
+  termino_debounce <- debounce(termino_crudo, 400)
   
+  # procesar término de búsqueda
+  termino <- reactive({
+    termino_debounce() |> 
+      # minúsculas
+      tolower() |> 
+      # para múltiples palabras
+      str_replace("\\s+", "\\.\\*")
+  })
   
   # buscar texto
   busqueda <- reactive({
+    req(termino() != "")
+    req(nchar(termino()) >= 3)
     message("buscando ", termino())
     
-    if (termino() == "") {
-      return(tibble())
-    } else {
-      sitio() |> 
-        filter(str_detect(texto, termino())) |> 
-        select(-texto) |>
-        arrange(desc(fecha))
-    }
+    sitio() |> 
+      # búsqueda
+      filter(str_detect(texto, termino())) |> 
+      select(-texto) |>
+      head(n = 50) |> # limitar máximos
+      arrange(desc(fecha))
   })
   
   # cantidad de resultados encontrados
   n_resultados <- reactive(nrow(busqueda()))
+  
+  # aviso por muchos resultados
+  observe({
+    if (n_resultados() == 50) {
+      showNotification("Demasiados resultados! Mostrando sólo 50",
+                       type = "warning") 
+    }
+  })
   
   # texto antes de los resultados
   output$texto_resultados <- renderText({
