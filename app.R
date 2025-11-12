@@ -125,7 +125,7 @@ server <- function(input, output, session) {
       # búsqueda
       filter(str_detect(texto, termino())) |> 
       select(-texto) |>
-      head(n = 50) |> # limitar máximos
+      head(n = 40) |> # limitar máximos
       arrange(desc(fecha))
   })
   
@@ -134,8 +134,8 @@ server <- function(input, output, session) {
   
   # aviso por muchos resultados
   observe({
-    if (n_resultados() == 50) {
-      showNotification("Demasiados resultados! Mostrando sólo 50",
+    if (n_resultados() == 40) {
+      showNotification("Demasiados resultados! Mostrando sólo 40",
                        type = "warning") 
     }
   })
