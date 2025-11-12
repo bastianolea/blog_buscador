@@ -161,6 +161,7 @@ server <- function(input, output, session) {
           
           # título con link
           a(href = elemento$link,
+            target = "_blank",
             h3(elemento$titulo)),
           
           # fecha

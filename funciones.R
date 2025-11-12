@@ -80,24 +80,23 @@ procesar_json <- function(sitio) {
 }
 
 # texto de etiquetas separado por punto y comas
-etiquetas <- function(x) {
-  map(x, \(tag) {
-    elementos <- tag |> 
-      # separar en elementos
-      str_split(";") |> 
-      unlist() |> 
-      # eliminar espacios
-      str_trim()
-    
-    # cada elemento convertirlo
-    map(elementos,
-        ~div(class = "etiquetas",
-             # enlace
-             a(
-               div(.x, class = "texto_etiquetas"),
-               href = paste0("https://bastianolea.rbind.io/tags/", 
-                             str_replace_all(.x, " ", "-")),
-               target = "_blank")
-        ))
-  })
+etiquetas <- function(tag) {
+  
+  elementos <- tag |> 
+    # separar en elementos
+    str_split(";") |> 
+    unlist() |> 
+    # eliminar espacios
+    str_trim()
+  
+  # cada elemento convertirlo
+  map(elementos,
+      ~div(class = "etiquetas",
+           # enlace
+           a(
+             div(.x, class = "texto_etiquetas"),
+             href = paste0("https://bastianolea.rbind.io/tags/", 
+                           str_replace_all(.x, " ", "-")),
+             target = "_blank")
+      ))
 }
