@@ -1,6 +1,6 @@
 # benchmark
 
-install.packages("yyjsonr")
+# install.packages("yyjsonr")
 
 download.file("https://bastianolea.rbind.io/index.json",
               "data/index.json")
