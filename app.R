@@ -1,13 +1,13 @@
-library(shiny)
-library(bslib)
-library(jsonlite)
-library(dplyr)
-library(stringr)
-library(lubridate)
-library(glue)
-library(purrr)
-library(cli)
-library(shinydisconnect)
+library(shiny) |> suppressPackageStartupMessages()
+library(bslib) |> suppressPackageStartupMessages()
+library(jsonlite) |> suppressPackageStartupMessages()
+library(dplyr) |> suppressPackageStartupMessages()
+library(stringr) |> suppressPackageStartupMessages()
+library(lubridate) |> suppressPackageStartupMessages()
+library(glue) |> suppressPackageStartupMessages()
+library(purrr) |> suppressPackageStartupMessages()
+library(cli) |> suppressPackageStartupMessages()
+library(shinydisconnect) |> suppressPackageStartupMessages()
 
 source("funciones.R")
 
@@ -67,7 +67,6 @@ ui <- page_fluid(
     style = "margin-top: 16px; margin-bottom: 32px;",
     textOutput("texto_resultados")
   ),
-  # hr(),
   
   # salida en html de resultados
   htmlOutput("resultados"),
@@ -90,7 +89,6 @@ server <- function(input, output, session) {
   sitio <- reactive({
     message("obteniendo sitio...")
     
-    # procesar_xml("https://bastianolea.rbind.io/index.xml")
     procesar_json("https://bastianolea.rbind.io/index.json")
     
   }) |> 
@@ -130,7 +128,11 @@ server <- function(input, output, session) {
   })
   
   # cantidad de resultados encontrados
-  n_resultados <- reactive(nrow(busqueda()))
+  n_resultados <- reactive({
+    resultados <- nrow(busqueda())
+    message(resultados, " resultados encontrados")
+    return(resultados)
+    })
   
   # aviso por muchos resultados
   observe({
@@ -161,8 +163,6 @@ server <- function(input, output, session) {
     # browser()
     req(termino() != "")
     req(n_resultados() > 0)
-    
-    # browser()
     
     # separar resultados
     elementos <- busqueda() |> 
@@ -200,13 +200,11 @@ server <- function(input, output, session) {
     div(
       ui_resultados,
       div(
-        # style = "opacity: 60%;",
         markdown("Esta página también es una [aplicación Shiny](https://bastianolea.rbind.io/tags/shiny/) desarrollada en R. Puedes [revisar el código en este repositorio](https://github.com/bastianolea/blog_buscador).")
       )
     )
     
   })
-  
   
 }
 
