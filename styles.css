@@ -16,7 +16,7 @@ a {
 
 .fecha {
   font-size: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   margin-top: -4px;
 }
 
@@ -26,7 +26,6 @@ a {
 }
 
 .etiquetas {
-
   margin: 3px; 
   margin-left: 1px; 
   margin-right: 1px; 
