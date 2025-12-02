@@ -96,7 +96,7 @@ server <- function(input, output, session) {
     bindCache(
       floor_date(
         now(), 
-        unit = "hours")
+        unit = "4 hours")
     )
   
   
@@ -160,7 +160,6 @@ server <- function(input, output, session) {
   
   # salida en html de resultados de búsqueda
   output$resultados <- renderUI({
-    # browser()
     req(termino() != "")
     req(n_resultados() > 0)
     
@@ -177,15 +176,20 @@ server <- function(input, output, session) {
           
           # título con link
           a(href = elemento$link,
-            target = "_blank",
-            h3(elemento$titulo)),
+            h3(markdown(elemento$titulo))
+          ),
           
           # fecha
           div(class = "fecha", 
               elemento$fecha),
           
-          # # texto
-          # p(str_trunc(elemento$texto, 200, ellipsis = "…")),
+          # texto
+          div(style = "font-size: 90%; line-height: 1.2;",
+              markdown(
+                str_trunc(elemento$resumen, 
+                          320, ellipsis = "…")
+              )
+          ),
           
           # etiquetas con links
           div(class = "contenedor_etiquetas",

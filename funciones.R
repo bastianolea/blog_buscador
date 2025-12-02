@@ -67,10 +67,12 @@ procesar_json <- function(sitio) {
   datos <- obtener |> 
     tibble() |> 
     rename(texto = content,
+           resumen = excerpt,
            link = href,
            fecha = date,
            titulo = title) |> 
-    mutate(texto = limpiar_html(texto)) |> 
+    # mutate(texto = limpiar_html(texto)) |> 
+    # mutate(resumen = limpiar_html(resumen)) |>
     mutate(fecha = extraer_fechas(fecha)) |> 
     mutate(link = str_replace_all(link,
                                   "https://bastianoleah.netlify.app", 
