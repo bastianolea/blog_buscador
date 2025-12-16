@@ -71,6 +71,7 @@ procesar_json <- function(sitio) {
            link = href,
            fecha = date,
            titulo = title) |> 
+    mutate(texto = tolower(texto)) |> # minúsculas para búsqueda
     # mutate(texto = limpiar_html(texto)) |> 
     # mutate(resumen = limpiar_html(resumen)) |>
     mutate(fecha = extraer_fechas(fecha)) |> 

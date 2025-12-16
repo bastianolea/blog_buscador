@@ -14,6 +14,8 @@ source("funciones.R")
 # cache local
 shinyOptions(cache = cachem::cache_disk("./cache"))
 
+
+# interfaz ----
 ui <- page_fluid(
   style = "max-width: 700px; padding: 24px;",
   title = "Bastián Olea: Buscador",
@@ -53,6 +55,7 @@ ui <- page_fluid(
     markdown("Ingresa cualquier término, concepto o función de R para buscar entre [las publicaciones del blog](https://bastianolea.rbind.io/blog/).")
   ),
   
+  ## input ----
   # input de texto
   textInput("busqueda", 
             NULL, 
@@ -85,6 +88,7 @@ ui <- page_fluid(
 
 server <- function(input, output, session) {
   
+  # obtener ----
   # obtener datos del sitio
   sitio <- reactive({
     message("obteniendo sitio...")
@@ -110,9 +114,10 @@ server <- function(input, output, session) {
       # minúsculas
       tolower() |> 
       # para múltiples palabras
-      str_replace("\\s+", "\\.\\*")
+      str_replace("\\s+", "\\.\\*") # cambia espacios por ".*" (regex para cualquier texto de cualquier largo)
   })
   
+  # buscar ----
   # buscar texto
   busqueda <- reactive({
     req(termino() != "")
@@ -126,6 +131,8 @@ server <- function(input, output, session) {
       head(n = 40) |> # limitar máximos
       arrange(desc(fecha))
   })
+  
+  # outputs ----
   
   # cantidad de resultados encontrados
   n_resultados <- reactive({
@@ -158,6 +165,7 @@ server <- function(input, output, session) {
     
   })
   
+  ## resultados ----
   # salida en html de resultados de búsqueda
   output$resultados <- renderUI({
     req(termino() != "")
