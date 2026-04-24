@@ -12,8 +12,7 @@ library(shinydisconnect) |> suppressPackageStartupMessages()
 source("funciones.R")
 
 # cache local
-shinyOptions(cache = cachem::cache_disk("./cache"))
-
+# shinyOptions(cache = cachem::cache_disk("./cache"))
 
 # interfaz ----
 ui <- page_fluid(
@@ -27,9 +26,17 @@ ui <- page_fluid(
     bg = "#EAD1FA",
     primary = "#6E3A98",
     font_scale = 1.1,
-    base_font = font_google("Atkinson Hyperlegible"),
-    heading_font = font_google("EB Garamond"),
+    # base_font = font_google("Atkinson Hyperlegible"),
+    # heading_font = font_google("EB Garamond"),
+    base_font = "Atkinson Hyperlegible",
+    heading_font = "EB Garamond"
   ),
+  
+  # tipografía para html, instalada con gfonts::setup_font()
+  # gfonts::setup_font("eb-garamond", "fonts")
+  # gfonts::setup_font("atkinson-hyperlegible", "fonts")
+  tags$link(rel = "stylesheet", href = "fonts/css/atkinson-hyperlegible.css"),
+  tags$link(rel = "stylesheet", href = "fonts/css/eb-garamond.css"),
   
   # estilos
   includeCSS("styles.css"),
