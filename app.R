@@ -162,27 +162,29 @@ server <- function(input, output, session) {
       arrange(desc(puntaje)) |>
       select(-contenido, -texto)
 
-    # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
-    if (nrow(resultados_bm25) == 0) {
-      showNotification(
-        "Pocos resultados. Intenta una búsqueda más precisa!",
-      )
+    # # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
+    # if (nrow(resultados_bm25) == 0) {
+    #   showNotification(
+    #     "Pocos resultados. Intenta una búsqueda más precisa!",
+    #   )
+    #
+    #   resultados_stringr <- sitio() |>
+    #     # búsqueda
+    #     filter(
+    #       str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
+    #     ) |>
+    #     select(-contenido) |>
+    #     head(n = 15) |> # limitar máximos
+    #     arrange(desc(fecha))
+    #
+    #   resultado <- resultados_stringr
+    # } else {
+    #   resultado <- resultados_bm25
+    # }
+    #
+    # return(resultado)
 
-      resultados_stringr <- sitio() |>
-        # búsqueda
-        filter(
-          str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
-        ) |>
-        select(-contenido) |>
-        head(n = 15) |> # limitar máximos
-        arrange(desc(fecha))
-
-      resultado <- resultados_stringr
-    } else {
-      resultado <- resultados_bm25
-    }
-
-    return(resultado)
+    return(resultados_bm25)
   })
 
   # outputs ----
