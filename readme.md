@@ -13,6 +13,7 @@ La app [guarda un cache](https://bastianolea.rbind.io/blog/shiny_optimizar/) de 
 
 ## Actualizaciones
 - 2026-06-06: algoritmo de búsqueda mejorado (BM25), que ordena resultados por relevancia y considerando también su fecha de publicación
+- 2026-04-24: las tipografías se incluyeron en la aplicación para disminuir tiempo de carga y eliminar conexiones a otros servidores
 - 2025-12-02: ahora los resultados muestran el texto de resumen de cada post
 
 ## Recursos
