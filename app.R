@@ -117,7 +117,7 @@ server <- function(input, output, session) {
 
   # esperar que se deje de escribir para buscar
   termino_crudo <- reactive(input$busqueda)
-  termino_debounce <- debounce(termino_crudo, 400)
+  termino_debounce <- debounce(termino_crudo, 600)
 
   # preprocesar término de búsqueda
   termino <- reactive({
@@ -133,6 +133,7 @@ server <- function(input, output, session) {
   # buscar ----
   # buscar texto
   busqueda <- reactive({
+    # va a buscar primero por bm25, y si no sale nada, con str_detect
     req(termino() != "")
     req(nchar(termino()) >= 2)
     message("buscando ", termino())
@@ -162,29 +163,29 @@ server <- function(input, output, session) {
       arrange(desc(puntaje)) |>
       select(-contenido, -texto)
 
-    # # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
-    # if (nrow(resultados_bm25) == 0) {
-    #   showNotification(
-    #     "Pocos resultados. Intenta una búsqueda más precisa!",
-    #   )
-    #
-    #   resultados_stringr <- sitio() |>
-    #     # búsqueda
-    #     filter(
-    #       str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
-    #     ) |>
-    #     select(-contenido) |>
-    #     head(n = 15) |> # limitar máximos
-    #     arrange(desc(fecha))
-    #
-    #   resultado <- resultados_stringr
-    # } else {
-    #   resultado <- resultados_bm25
-    # }
-    #
-    # return(resultado)
+    # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
+    if (nrow(resultados_bm25) == 0) {
+      showNotification(
+        "Pocos resultados. Intenta una búsqueda más precisa!",
+      )
 
-    return(resultados_bm25)
+      resultados_stringr <- sitio() |>
+        # búsqueda
+        filter(
+          str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
+        ) |>
+        select(-contenido) |>
+        head(n = 15) |> # limitar máximos
+        arrange(desc(fecha))
+
+      resultado <- resultados_stringr
+    } else {
+      resultado <- resultados_bm25
+    }
+
+    return(resultado)
+
+    # return(resultados_bm25)
   })
 
   # outputs ----
