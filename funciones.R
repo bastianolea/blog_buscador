@@ -6,100 +6,135 @@ limpiar_html <- function(texto) {
 }
 
 limpiar_fechas <- function(texto) {
-  texto |> 
+  texto |>
     str_extract("\\d{2} \\w{3} \\d{4}") |>
     lubridate::dmy()
 }
 
 extraer_fechas <- function(texto) {
-  texto |> 
+  texto |>
     str_extract("\\d{4}-\\d{2}-\\d{2}") |>
     lubridate::ymd()
 }
 
 procesar_xml <- function(sitio) {
-  
   # leer sitio
   pg <- read_xml(sitio)
-  
+
   # extraer entradas
   items <- xml_find_all(pg, "//item")
-  
-  
+
   # extraer elementos
-  titulos <- items |> 
-    xml_find_all("title") |> 
+  titulos <- items |>
+    xml_find_all("title") |>
     xml_text()
-  
-  descr <- items |> 
-    xml_find_all("description") |> 
+
+  descr <- items |>
+    xml_find_all("description") |>
     xml_text() |>
     limpiar_html()
-  
-  fechas <- items |> 
-    xml_find_all("pubDate") |> 
-    xml_text() |> 
+
+  fechas <- items |>
+    xml_find_all("pubDate") |>
+    xml_text() |>
     limpiar_fechas()
-  
-  links <- items |> 
-    xml_find_all("link") |> 
-    xml_text() |> 
-    str_replace_all("https://bastianoleah.netlify.app", "https://bastianolea.rbind.io")
-  
-  
+
+  links <- items |>
+    xml_find_all("link") |>
+    xml_text() |>
+    str_replace_all(
+      "https://bastianoleah.netlify.app",
+      "https://bastianolea.rbind.io"
+    )
+
   # crear tabla ----
   datos <- tibble(
     titulo = titulos,
     texto = descr,
     fecha = fechas,
-    link = links) |> 
+    link = links
+  ) |>
     mutate(texto = paste(titulo, descr))
-  
+
   return(datos)
 }
 
 
 procesar_json <- function(sitio) {
   # sitio <- "https://bastianolea.rbind.io/index.json"
-  
+
   obtener <- sitio |> jsonlite::fromJSON()
-  
-  datos <- obtener |> 
-    tibble() |> 
-    rename(texto = content,
-           resumen = excerpt,
-           link = href,
-           fecha = date,
-           titulo = title) |> 
-    mutate(texto = tolower(texto)) |> # minúsculas para búsqueda
-    # mutate(texto = limpiar_html(texto)) |> 
+
+  stopwords <- stopwords::stopwords("es", source = "snowball")
+
+  datos <- obtener |>
+    tibble() |>
+    rename(
+      texto = content,
+      resumen = excerpt,
+      link = href,
+      fecha = date,
+      titulo = title
+    ) |>
+    # limpiar texto del contenido de posts
+    mutate(
+      texto = texto |>
+        str_remove_all("[[:punct:]]") |>
+        str_remove_all(
+          paste0("\\b(", paste(stopwords, collapse = "|"), ")\\b")
+        )
+    ) |>
+    mutate(resumen = str_remove_all(resumen, "\\_|\\*")) |>
+    # minúsculas para búsqueda
+    mutate(contenido = paste(titulo, resumen, texto)) |>
+    mutate(contenido = tolower(contenido)) |>
+    # mutate(texto = limpiar_html(texto)) |>
     # mutate(resumen = limpiar_html(resumen)) |>
-    mutate(fecha = extraer_fechas(fecha)) |> 
-    mutate(link = str_replace_all(link,
-                                  "https://bastianoleah.netlify.app", 
-                                  "https://bastianolea.rbind.io"))
-  
+    mutate(fecha = extraer_fechas(fecha)) |>
+    mutate(
+      link = str_replace_all(
+        link,
+        "https://bastianoleah.netlify.app",
+        "https://bastianolea.rbind.io"
+      )
+    )
+
   return(datos)
 }
 
 # texto de etiquetas separado por punto y comas
 etiquetas <- function(tag) {
-  
-  elementos <- tag |> 
+  elementos <- tag |>
     # separar en elementos
-    str_split(";") |> 
-    unlist() |> 
+    str_split(";") |>
+    unlist() |>
     # eliminar espacios
     str_trim()
-  
+
   # cada elemento convertirlo
-  map(elementos,
-      ~div(class = "etiquetas",
-           # enlace
-           a(
-             div(.x, class = "texto_etiquetas"),
-             href = paste0("https://bastianolea.rbind.io/tags/", 
-                           str_replace_all(.x, " ", "-")),
-             target = "_blank")
-      ))
+  map(
+    elementos,
+    ~ div(
+      class = "etiquetas",
+      # enlace
+      a(
+        div(.x, class = "texto_etiquetas"),
+        href = paste0(
+          "https://bastianolea.rbind.io/tags/",
+          str_replace_all(.x, " ", "-")
+        ),
+        target = "_blank"
+      )
+    )
+  )
+}
+
+
+reescalar <- function(x, target) {
+  x_min <- min(x, na.rm = TRUE)
+  x_max <- max(x, na.rm = TRUE)
+  t_min <- min(target, na.rm = TRUE)
+  t_max <- max(target, na.rm = TRUE)
+
+  t_min + (x - x_min) / (x_max - x_min) * (t_max - t_min)
 }

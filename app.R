@@ -10,6 +10,7 @@
   library(cli)
   library(shinydisconnect)
   library(rbm25)
+  library(stopwords)
 } |>
   suppressPackageStartupMessages()
 
@@ -64,7 +65,7 @@ ui <- page_fluid(
   div(
     style = "margin-bottom: 6px;",
     markdown(
-      "Ingresa cualquier término, concepto o función de R para buscar entre [las publicaciones del blog](https://bastianolea.rbind.io/blog/)."
+      "Ingresa cualquier tema, concepto o función de R para buscar entre [las publicaciones de mi blog de análisis de datos con R](https://bastianolea.rbind.io/blog/)."
     )
   ),
 
@@ -110,7 +111,7 @@ server <- function(input, output, session) {
     bindCache(
       floor_date(
         now(),
-        unit = "4 hours"
+        unit = "6 hours"
       )
     )
 
@@ -133,15 +134,55 @@ server <- function(input, output, session) {
   # buscar texto
   busqueda <- reactive({
     req(termino() != "")
-    req(nchar(termino()) >= 3)
+    req(nchar(termino()) >= 2)
     message("buscando ", termino())
 
-    sitio() |>
+    # browser()
+
+    # busca textos usando algoritmo bm25
+    # también entrega puntaje a publicaciones más recientes
+    resultados_bm25 <- sitio() |>
       # búsqueda
-      filter(str_detect(texto, termino())) |>
-      select(-texto) |>
-      head(n = 40) |> # limitar máximos
-      arrange(desc(fecha))
+      mutate(
+        puntaje_busqueda = bm25_score(
+          contenido,
+          termino(),
+          lang = "es"
+        )
+      ) |>
+      relocate(puntaje_busqueda, .after = contenido) |>
+      filter(puntaje_busqueda > 0) |>
+      # considerar puntaje para publicaciones recientes
+      mutate(puntaje_fecha = dense_rank(fecha)) |>
+      mutate(
+        puntaje_fecha = reescalar(puntaje_fecha, puntaje_busqueda * 0.4)
+      ) |>
+      mutate(puntaje = puntaje_busqueda + puntaje_fecha) |>
+      # ordenar por mayor puntaje
+      arrange(desc(puntaje)) |>
+      select(-contenido, -texto)
+
+    # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
+    if (nrow(resultados_bm25) == 0) {
+      showNotification(
+        "Pocos resultados. Intenta una búsqueda más precisa!",
+      )
+
+      resultados_stringr <- sitio() |>
+        # búsqueda
+        filter(
+          str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
+        ) |>
+        select(-contenido) |>
+        head(n = 15) |> # limitar máximos
+        arrange(desc(fecha))
+
+      resultado <- resultados_stringr
+    } else {
+      resultado <- resultados_bm25
+    }
+
+    return(resultado)
   })
 
   # outputs ----
@@ -157,7 +198,7 @@ server <- function(input, output, session) {
   observe({
     if (n_resultados() == 40) {
       showNotification(
-        "Demasiados resultados! Mostrando sólo 40",
+        "Demasiados resultados! Ajusta la búsqueda",
         type = "warning"
       )
     }

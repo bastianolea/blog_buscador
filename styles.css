@@ -51,3 +51,15 @@ a {
   opacity: 60%;
   font-family: "EB Garamond";
 }
+
+.shiny-notification {
+  background-color: #8F6AC0 !important;
+  color: #EAD1FA !important;
+}
+
+h3 {
+  code {
+    color: #8F6AC0 !important;
+    background-color: none !important;
+  }
+}
