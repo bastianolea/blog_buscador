@@ -70,3 +70,10 @@ h3 {
     background-color: none !important;
   }
 }
+
+
+#ss-connect-dialog {
+  border-radius: 5px !important;
+  box-shadow: none !important;
+  border: solid 1px color(srgb 0.446 0.3175 0.635);
+}

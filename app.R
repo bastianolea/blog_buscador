@@ -52,10 +52,10 @@ ui <- page_fluid(
   # mensaje en caso de desconexión
   disconnectMessage(
     refresh = "Volver a cargar",
-    background = "#EAD1FA",
-    colour = "#553A74",
-    refreshColour = "#9069C0",
-    overlayColour = "#553A74",
+    background = "#916FC3",
+    colour = "#EAD1FA",
+    refreshColour = "#CBACE2",
+    overlayColour = "#EAD1FA",
     size = 14,
     text = "La aplicación se desconectó. Vuelve a cargar la página."
   ),
@@ -71,7 +71,7 @@ ui <- page_fluid(
       "Ingresa cualquier tema, concepto o función de R para buscar entre las publicaciones de mi <a href='https://bastianolea.rbind.io/blog/' target='_blank'>blog de análisis de datos con R.</a>"
     )
   ),
-
+  
   ## input ----
   # input de texto
   textInput(
@@ -128,7 +128,7 @@ server <- function(input, output, session) {
       # minúsculas
       tolower() |>
       # eliminar puntuaciones
-      str_remove_all("[[:punct:]]") #|>
+      str_remove_all("[[:punct:]]")
     # para múltiples palabras
     # str_replace("\\s+", "\\.\\*") # cambia espacios por ".*" (regex para cualquier texto de cualquier largo)
   })
