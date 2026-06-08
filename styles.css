@@ -2,6 +2,8 @@
 h2 {
   font-weight: 500;
   font-size: 240%;
+  color: #6E3998;
+  margin-bottom: 16px;
 }
 
 h3 {
@@ -12,6 +14,11 @@ h3 {
 
 a {
   color: #9069C0;
+}
+
+.form-control {
+  background-color: #f3e4fc !important;
+  border: 1px solid #ceb2e6 !important;
 }
 
 .fecha {

@@ -46,6 +46,9 @@ ui <- page_fluid(
   # estilos
   includeCSS("styles.css"),
 
+  # iframeResizer: permite que la página padre ajuste el alto del iframe al contenido
+  tags$script(src = "iframeResizer.contentWindow.min.js"),
+
   # mensaje en caso de desconexión
   disconnectMessage(
     refresh = "Volver a cargar",
@@ -58,14 +61,14 @@ ui <- page_fluid(
   ),
 
   # espaciador
-  div(style = "height: 64px;"),
+  # div(style = "height: 64px;"),
 
   h2("Buscador"),
 
   div(
-    style = "margin-bottom: 6px;",
-    markdown(
-      "Ingresa cualquier tema, concepto o función de R para buscar entre [las publicaciones de mi blog de análisis de datos con R](https://bastianolea.rbind.io/blog/)."
+    style = "margin-bottom: 32px;",
+    HTML(
+      "Ingresa cualquier tema, concepto o función de R para buscar entre las publicaciones de mi <a href='https://bastianolea.rbind.io/blog/' target='_blank'>blog de análisis de datos con R.</a>"
     )
   ),
 
@@ -87,15 +90,15 @@ ui <- page_fluid(
   ),
 
   # salida en html de resultados
-  htmlOutput("resultados"),
-
-  # footer
-  div(
-    style = "margin-bottom: 24px;",
-    strong(
-      a("Volver al blog", href = "https://bastianolea.rbind.io/blog/")
-    )
-  )
+  htmlOutput("resultados")
+  # 
+  # # footer
+  # div(
+  #   style = "margin-top: 24px; margin-bottom: 24px;",
+  #   strong(
+  #     a("Volver al blog", href = "https://bastianolea.rbind.io/blog/")
+  #   )
+  # )
 )
 
 
@@ -166,7 +169,7 @@ server <- function(input, output, session) {
     # si no se encuentra nada, hacer búsqueda con stringr para mostrar algo
     if (nrow(resultados_bm25) == 0) {
       showNotification(
-        "Pocos resultados. Intenta una búsqueda más precisa!",
+        "Pocos resultados. Intenta una búsqueda distinta!",
       )
 
       resultados_stringr <- sitio() |>
@@ -239,7 +242,10 @@ server <- function(input, output, session) {
         class = "resultado",
 
         # título con link
-        a(href = elemento$link, h3(markdown(elemento$titulo))),
+        a(href = elemento$link, 
+          target = "_blank",
+          h3(markdown(elemento$titulo))
+          ),
 
         # fecha
         div(class = "fecha", elemento$fecha),
@@ -264,8 +270,8 @@ server <- function(input, output, session) {
     div(
       ui_resultados,
       div(
-        markdown(
-          "Esta página también es una [aplicación Shiny](https://bastianolea.rbind.io/tags/shiny/) desarrollada en R. Puedes [revisar el código en este repositorio](https://github.com/bastianolea/blog_buscador)."
+        HTML(
+          "Esta página también es una <a href='https://bastianolea.rbind.io/blog/shiny/' target='_blank'>aplicación Shiny</a> desarrollada en R. Puedes <a href='https://bastianolea.rbind.io/blog/buscador/' target='_blank'>leer más sobre esta app aquí.</a>"
         )
       )
     )
