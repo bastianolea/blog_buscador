@@ -12,6 +12,7 @@ La búsqueda se hace con el [algoritmo BM25 implementado en el paquete {rbm25}](
 La app [guarda un cache](https://bastianolea.rbind.io/blog/shiny_optimizar/) de los datos del sitio cada 6 horas para no sobrecargar el servidor.
 
 ## Actualizaciones
+- 2026-06-20: optimización del JSON que almacena textos del sitio
 - 2026-06-06: algoritmo de búsqueda mejorado (BM25), que ordena resultados por relevancia y considerando también su fecha de publicación
 - 2026-04-24: las tipografías se incluyeron en la aplicación para disminuir tiempo de carga y eliminar conexiones a otros servidores
 - 2025-12-02: ahora los resultados muestran el texto de resumen de cada post

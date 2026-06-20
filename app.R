@@ -1,7 +1,7 @@
 {
   library(shiny)
   library(bslib)
-  library(jsonlite)
+  library(yyjsonr)
   library(dplyr)
   library(stringr)
   library(lubridate)
@@ -11,6 +11,7 @@
   library(shinydisconnect)
   library(rbm25)
   library(stopwords)
+  library(shinycssloaders)
 } |>
   suppressPackageStartupMessages()
 
@@ -60,9 +61,6 @@ ui <- page_fluid(
     text = "La aplicación se desconectó. Vuelve a cargar la página."
   ),
 
-  # espaciador
-  # div(style = "height: 64px;"),
-
   h2("Buscador"),
 
   div(
@@ -71,14 +69,12 @@ ui <- page_fluid(
       "Ingresa cualquier tema, concepto o función de R para buscar entre las publicaciones de mi <a href='https://bastianolea.rbind.io/blog/' target='_blank'>blog de análisis de datos con R.</a>"
     )
   ),
-  
+
   ## input ----
-  # input de texto
   textInput(
     "busqueda",
     NULL,
     value = NULL,
-    # value = "rvest",
     placeholder = "Escribe un término de búsqueda",
     width = "100%"
   ),
@@ -90,25 +86,34 @@ ui <- page_fluid(
   ),
 
   # salida en html de resultados
-  htmlOutput("resultados")
-  # 
-  # # footer
-  # div(
-  #   style = "margin-top: 24px; margin-bottom: 24px;",
-  #   strong(
-  #     a("Volver al blog", href = "https://bastianolea.rbind.io/blog/")
-  #   )
-  # )
+  htmlOutput("resultados") |>
+    withSpinner(proxy.height = "128px", color = "#8F6AC0", type = 7)
 )
 
 
 server <- function(input, output, session) {
-  # obtener ----
-  # obtener datos del sitio
-  sitio <- reactive({
-    message("obteniendo sitio...")
+  # descargar ----
+  observe({
+    message("descargando sitio...")
+    download.file("https://bastianolea.rbind.io/index.json", "cache/index.json")
+  })
 
-    procesar_json("https://bastianolea.rbind.io/index.json")
+  # cargar ----
+  datos_sitio <- reactive({
+    message("cargando sitio...")
+
+    # leer descargado
+    yyjsonr::read_json_file("cache/index.json")
+
+    # # para probar en local
+    # yyjsonr::read_json_file("~/R/blog-r/public/index.json")
+  })
+
+  # procesar ----
+  sitio <- reactive({
+    message("procesando sitio...")
+
+    datos_sitio() |> procesar_json()
   }) |>
     # guardar cache por hora
     bindCache(
@@ -118,9 +123,11 @@ server <- function(input, output, session) {
       )
     )
 
+  # buscar ----
+
   # esperar que se deje de escribir para buscar
   termino_crudo <- reactive(input$busqueda)
-  termino_debounce <- debounce(termino_crudo, 600)
+  termino_debounce <- debounce(termino_crudo, 800)
 
   # preprocesar término de búsqueda
   termino <- reactive({
@@ -128,12 +135,10 @@ server <- function(input, output, session) {
       # minúsculas
       tolower() |>
       # eliminar puntuaciones
-      str_remove_all("[[:punct:]]")
-    # para múltiples palabras
-    # str_replace("\\s+", "\\.\\*") # cambia espacios por ".*" (regex para cualquier texto de cualquier largo)
+      str_replace_all("[[:punct:]]", " ") |>
+      str_squish()
   })
 
-  # buscar ----
   # buscar texto
   busqueda <- reactive({
     # va a buscar primero por bm25, y si no sale nada, con str_detect
@@ -154,8 +159,15 @@ server <- function(input, output, session) {
           lang = "es"
         )
       ) |>
-      relocate(puntaje_busqueda, .after = contenido) |>
       filter(puntaje_busqueda > 0) |>
+      arrange(desc(puntaje_busqueda))
+
+    # resultados_bm25 |>
+    #   arrange(desc(puntaje_busqueda)) |>
+    #   select(titulo, puntaje_busqueda)
+
+    resultados_bm25 <- resultados_bm25 |>
+      relocate(puntaje_busqueda, .after = contenido) |>
       # considerar puntaje para publicaciones recientes
       mutate(puntaje_fecha = dense_rank(fecha)) |>
       mutate(
@@ -175,7 +187,11 @@ server <- function(input, output, session) {
       resultados_stringr <- sitio() |>
         # búsqueda
         filter(
-          str_detect(contenido, termino() |> str_replace("\\s+", "\\.\\*"))
+          str_detect(
+            contenido,
+            termino() |>
+              str_replace("\\s+", "\\.\\*")
+          )
         ) |>
         select(-contenido) |>
         head(n = 15) |> # limitar máximos
@@ -242,10 +258,11 @@ server <- function(input, output, session) {
         class = "resultado",
 
         # título con link
-        a(href = elemento$link, 
+        a(
+          href = elemento$link,
           target = "_blank",
           h3(markdown(elemento$titulo))
-          ),
+        ),
 
         # fecha
         div(class = "fecha", elemento$fecha),

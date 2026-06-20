@@ -62,12 +62,17 @@ procesar_xml <- function(sitio) {
 
 procesar_json <- function(sitio) {
   # sitio <- "https://bastianolea.rbind.io/index.json"
+  # sitio <- "~/R/blog-r/public/index.json"
 
-  obtener <- sitio |> jsonlite::fromJSON()
+  # obtener <- jsonlite::fromJSON(sitio)
+
+  # tibble(obtener) |>
+  #   slice(11) |>
+  #   pull(content)
 
   stopwords <- stopwords::stopwords("es", source = "snowball")
 
-  datos <- obtener |>
+  datos <- sitio |>
     tibble() |>
     rename(
       texto = content,
@@ -76,29 +81,24 @@ procesar_json <- function(sitio) {
       fecha = date,
       titulo = title
     ) |>
+    # minúsculas para búsqueda
+    mutate(contenido = paste(titulo, texto)) |>
     # limpiar texto del contenido de posts
     mutate(
-      texto = texto |>
-        str_remove_all("[[:punct:]]") |>
+      contenido = contenido |>
+        str_to_lower() |>
+        str_replace_all("[[:punct:]]", " ") |>
         str_remove_all(
-          paste0("\\b(", paste(stopwords, collapse = "|"), ")\\b")
-        )
+          paste(
+            paste0("\\b", stopwords, "\\b"),
+            collapse = "|"
+          )
+        ) |>
+        str_squish()
     ) |>
-    mutate(resumen = str_remove_all(resumen, "\\_|\\*")) |>
-    # minúsculas para búsqueda
-    mutate(contenido = paste(titulo, resumen, texto)) |>
-    mutate(contenido = tolower(contenido)) |>
-    # mutate(texto = limpiar_html(texto)) |>
-    # mutate(resumen = limpiar_html(resumen)) |>
-    mutate(fecha = extraer_fechas(fecha)) |>
-    mutate(
-      link = str_replace_all(
-        link,
-        "https://bastianoleah.netlify.app",
-        "https://bastianolea.rbind.io"
-      )
-    )
+    mutate(fecha = extraer_fechas(fecha))
 
+  # datos |> filter(str_detect(texto, "regex")) |> pull()
   return(datos)
 }
 
