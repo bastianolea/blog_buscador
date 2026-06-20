@@ -41,11 +41,7 @@ procesar_xml <- function(sitio) {
 
   links <- items |>
     xml_find_all("link") |>
-    xml_text() |>
-    str_replace_all(
-      "https://bastianoleah.netlify.app",
-      "https://bastianolea.rbind.io"
-    )
+    xml_text()
 
   # crear tabla ----
   datos <- tibble(
@@ -81,22 +77,27 @@ procesar_json <- function(sitio) {
       fecha = date,
       titulo = title
     ) |>
-    # minúsculas para búsqueda
-    mutate(contenido = paste(titulo, texto)) |>
+    mutate(fecha = extraer_fechas(fecha)) |>
+    # contenido para búsqueda
+    mutate(
+      contenido = paste(
+        str_to_lower(titulo),
+        str_to_lower(resumen),
+        texto
+      )
+    ) |>
     # limpiar texto del contenido de posts
     mutate(
       contenido = contenido |>
-        str_to_lower() |>
         str_replace_all("[[:punct:]]", " ") |>
-        str_remove_all(
-          paste(
-            paste0("\\b", stopwords, "\\b"),
-            collapse = "|"
-          )
-        ) |>
+        # str_remove_all(
+        #   paste(
+        #     paste0("\\b", stopwords, "\\b"),
+        #     collapse = "|"
+        #   )
+        # ) |>
         str_squish()
-    ) |>
-    mutate(fecha = extraer_fechas(fecha))
+    )
 
   # datos |> filter(str_detect(texto, "regex")) |> pull()
   return(datos)

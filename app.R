@@ -93,35 +93,47 @@ ui <- page_fluid(
 
 server <- function(input, output, session) {
   # descargar ----
-  observe({
-    message("descargando sitio...")
-    download.file("https://bastianolea.rbind.io/index.json", "cache/index.json")
-  })
+  # observe({
+  #   message("descargando sitio...")
+  #   download.file("https://bastianolea.rbind.io/index.json", "cache/index.json")
+  # })
+  #
+  # # cargar ----
+  # datos_sitio <- reactive({
+  #   message("cargando sitio...")
+  #
+  #   # leer descargado
+  #   # yyjsonr::read_json_file("cache/index.json")
+  #
+  #   # # para probar en local
+  #   yyjsonr::read_json_file("~/R/blog-r/public/index.json")
+  # })
+  #
+  # # procesar ----
+  # sitio <- reactive({
+  #   message("procesando sitio...")
+  #
+  #   datos_sitio() |> procesar_json()
+  # }) |>
+  #   # guardar cache por hora
+  #   bindCache(
+  #     floor_date(
+  #       now(),
+  #       unit = "6 hours"
+  #     )
+  #   )
 
-  # cargar ----
-  datos_sitio <- reactive({
-    message("cargando sitio...")
+  # obtener datos del sitio y procesarlos sin reactividad,
+  # porque es un requisito del buscador que sí o sí debe cumplirse
+  message("descargando sitio...")
+  download.file("https://bastianolea.rbind.io/index.json", "cache/index.json")
 
-    # leer descargado
-    yyjsonr::read_json_file("cache/index.json")
+  message("cargando datos...")
+  datos_sitio <- yyjsonr::read_json_file("cache/index.json")
 
-    # # para probar en local
-    # yyjsonr::read_json_file("~/R/blog-r/public/index.json")
-  })
-
-  # procesar ----
-  sitio <- reactive({
-    message("procesando sitio...")
-
-    datos_sitio() |> procesar_json()
-  }) |>
-    # guardar cache por hora
-    bindCache(
-      floor_date(
-        now(),
-        unit = "6 hours"
-      )
-    )
+  message("procesando datos...")
+  sitio <- procesar_json(datos_sitio)
+  message("listo para buscar!")
 
   # buscar ----
 
@@ -150,7 +162,7 @@ server <- function(input, output, session) {
 
     # busca textos usando algoritmo bm25
     # también entrega puntaje a publicaciones más recientes
-    resultados_bm25 <- sitio() |>
+    resultados_bm25 <- sitio |>
       # búsqueda
       mutate(
         puntaje_busqueda = bm25_score(
@@ -184,7 +196,7 @@ server <- function(input, output, session) {
         "Pocos resultados. Intenta una búsqueda distinta!",
       )
 
-      resultados_stringr <- sitio() |>
+      resultados_stringr <- sitio |>
         # búsqueda
         filter(
           str_detect(
